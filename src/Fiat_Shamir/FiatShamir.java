@@ -12,23 +12,29 @@ public class FiatShamir {
     //Открытые данные
     private int bitSize;
     private int k, t;
+    private BigInteger b[];
+    private byte[] message;
+    private String hash;
 
     //Секретные данные
     private BigInteger p, q;
     private BigInteger n, v[];
     private SecureRandom rand;
-    private BigInteger s[];
+    private BigInteger a[];
+    private BigInteger u, r;
 
 
-    public FiatShamir(int bitSize, int k, int t) {
+    //конструктор для подписи
+    public FiatShamir(int bitSize, byte[] message) {
         this.bitSize = bitSize;
-        this.k = k;
-        this.t = t;
+        this.message = message;
+//        this.k = k;
+//        this.t = t;
         this.rand = new SecureRandom();
         generateParameters();
     }
-
-    public FiatShamir(BigInteger n, BigInteger s[]) {
+    //конструктор для проверки подписи
+    public FiatShamir(BigInteger n, BigInteger a[]) {
         this.n = n;
         this.bitSize = n.bitLength();
         this.rand = new SecureRandom();
@@ -39,9 +45,9 @@ public class FiatShamir {
 
     public static String byteArrayToHexString(byte[] b) {
         String result = "";
-        for (int i = 0; i < b.length; i++) {
+        for (byte aB : b) {
             result +=
-                    Integer.toString((b[i] & 0xff) + 0x100, 16).substring(1);
+                    Integer.toString((aB & 0xff) + 0x100, 16).substring(1);
         }
         return result;
     }
@@ -59,9 +65,16 @@ public class FiatShamir {
 
     private void generateParameters() {
         p = randomNumber(true, bitSize);
+        System.out.println("Generated p = " + p);
         q = randomNumber(true, bitSize);
+        System.out.println("Generated q = " + q);
         n = p.multiply(q);
+        r = randomNumber(false, bitSize);
+        System.out.println("Generated r = " + r);
+        u = r.modPow(new BigInteger(new byte[]{2}), n);
+        System.out.println("Calculated u = " + u);
         generateDS();
+        generateOpenKey();
     }
 
     private void generateSecret() {
@@ -80,15 +93,43 @@ public class FiatShamir {
     }
 
     private void generateDS() {
+        hash = toSHA1(message);
         System.out.println("Current secret key = ");
-        for (int i = 0; i < bitSize; i++) {
+        for (int i = 0; i < hash.length(); i++) {
             BigInteger s_temp = randomNumber(false, 15);
             while (!(s_temp.gcd(n).equals(BigInteger.ONE)))
                 s_temp = randomNumber(false, bitSize);
-            s[i] = s_temp;
-            System.out.print(s[i]);
+            a[i] = s_temp;
+            System.out.print(a[i]);
         }
         System.out.println("------------------");
+    }
+
+    public BigInteger inverse(BigInteger a, BigInteger n) {
+//        BigInteger a = new BigInteger(this.toString());
+        BigInteger b = n, x = BigInteger.ZERO, d = BigInteger.ONE;
+        while (a.compareTo(BigInteger.ZERO) == 1)//a>0
+        {
+            BigInteger q = b.mod(a);
+            BigInteger y = a;
+            a = b.mod(a);
+            b = y;
+            y = d;
+            d = x.subtract(q.multiply(d));
+            x = y;
+        }
+        x = x.mod(n);
+        if (x.compareTo(BigInteger.ZERO) == -1)//x<0
+        {
+            x = (x.add(n)).mod(n);
+        }
+        return x;
+    }
+
+    private void generateOpenKey() {
+        for (int i = 0; i < hash.length(); i++) {
+            b[i] = inverse(a[i], n).modPow(new BigInteger(String.valueOf(2)), n);
+        }
     }
 }
 
