@@ -4,6 +4,7 @@ import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.util.Arrays;
 
 /**
  * Created by admin on 30.10.2015.
@@ -121,9 +122,35 @@ public class FiatShamir {
         return number;
     }
 
+    public int[] hexToBin(byte[] hex) {
+//        int[] bits = new int[bitSize * 8 + 1];
+        int[] bits = new int[160];
+        for (int i = 0; i < 160; i++) {
+            int sourceByte = 0xFF & (int) hex[i];//convert byte to unsigned int
+            int mask = 0x80;
+            for (int j = 0; j < 8; j++) {
+                int maskResult = sourceByte & mask;  // Extract the single bit
+                if (maskResult > 0) {
+                    bits[8 * i + j] = 1;
+                } else {
+                    bits[8 * i + j] = 0;  // Unnecessary since array is initiated to zero but good documentation
+                }
+                mask = mask >> 1;
+            }
+        }
+        System.out.print("Hash string in bits:   ");
+        for (int i = 0; i < bitSize; i++) {
+            System.out.print(bits[i]);
+        }
+        return bits;
+    }
+
     private void generateSecretKey() {
         byte[] concat = concat(message, u.toByteArray());
         hash = toSHA1(concat);
+        int[] bits = hexToBin(hash);
+        System.out.println();
+//        System.out.println("Hash = " + Arrays.toString(hash));
         System.out.println("Current secret key = ");
         a = new BigInteger[hash.length];
         for (int i = 0; i < hash.length; i++) {
