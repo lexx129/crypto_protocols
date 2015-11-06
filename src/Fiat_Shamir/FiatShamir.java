@@ -11,10 +11,12 @@ import java.security.SecureRandom;
 public class FiatShamir {
     //Открытые данные
     private int bitSize;
-    private int k, t;
+    private int k;
+    private BigInteger t;
     private BigInteger b[];
     private byte[] message;
-    private String hash;
+    private byte[] hash;
+    private BigInteger[] signature = new BigInteger[2];
 
     //Секретные данные
     private BigInteger p, q;
@@ -33,6 +35,7 @@ public class FiatShamir {
         this.rand = new SecureRandom();
         generateParameters();
     }
+
     //конструктор для проверки подписи
     public FiatShamir(BigInteger n, BigInteger a[]) {
         this.n = n;
@@ -40,7 +43,7 @@ public class FiatShamir {
         this.rand = new SecureRandom();
         this.k = v.length;
         this.v = v;
-        generateDS();
+        generateSecretKey();
     }
 
     public static String byteArrayToHexString(byte[] b) {
@@ -52,7 +55,7 @@ public class FiatShamir {
         return result;
     }
 
-    public static String toSHA1(byte[] convertme) {
+    public static byte[] toSHA1(byte[] convertme) {
         MessageDigest md = null;
         try {
             md = MessageDigest.getInstance("SHA-1");
@@ -60,7 +63,8 @@ public class FiatShamir {
             e.printStackTrace();
         }
         assert md != null;
-        return byteArrayToHexString(md.digest(convertme));
+//        return byteArrayToHexString(md.digest(convertme));
+        return md.digest(convertme);
     }
 
     private void generateParameters() {
@@ -69,15 +73,40 @@ public class FiatShamir {
         q = randomNumber(true, bitSize);
         System.out.println("Generated q = " + q);
         n = p.multiply(q);
+        System.out.println("Calculated n = " + n);
         r = randomNumber(false, bitSize);
         System.out.println("Generated r = " + r);
         u = r.modPow(new BigInteger(new byte[]{2}), n);
         System.out.println("Calculated u = " + u);
-        generateDS();
+        generateSecretKey();
         generateOpenKey();
+        generateDS();
+        System.out.println("Signature: (" + signature[0] +
+                ", " + signature[1] + ")");
+    }
+
+    private void generateDS() {
+        BigInteger mult = BigInteger.ONE;
+        for (int i = 0; i < hash.length; i++) {
+            BigInteger temp = new BigInteger(new byte[]{hash[i]});
+            mult = mult.multiply(a[i].modPow(temp, n));
+        }
+        t = r.multiply(mult);
+        t = t.mod(n);
+        signature[0] = new BigInteger(hash).abs();
+        signature[1] = t;
     }
 
     private void generateSecret() {
+    }
+
+    private byte[] concat(byte[] a, byte[] b) {
+        int aLen = a.length;
+        int bLen = b.length;
+        byte[] result = new byte[aLen + bLen];
+        System.arraycopy(a, 0, result, 0, aLen);
+        System.arraycopy(b, 0, result, aLen, bLen);
+        return result;
     }
 
     private BigInteger randomNumber(boolean prime, int size) {
@@ -92,17 +121,19 @@ public class FiatShamir {
         return number;
     }
 
-    private void generateDS() {
-        hash = toSHA1(message);
+    private void generateSecretKey() {
+        byte[] concat = concat(message, u.toByteArray());
+        hash = toSHA1(concat);
         System.out.println("Current secret key = ");
-        for (int i = 0; i < hash.length(); i++) {
-            BigInteger s_temp = randomNumber(false, 15);
+        a = new BigInteger[hash.length];
+        for (int i = 0; i < hash.length; i++) {
+            BigInteger s_temp = randomNumber(false, bitSize);
             while (!(s_temp.gcd(n).equals(BigInteger.ONE)))
                 s_temp = randomNumber(false, bitSize);
             a[i] = s_temp;
             System.out.print(a[i]);
         }
-        System.out.println("------------------");
+        System.out.println("\n------------------");
     }
 
     public BigInteger inverse(BigInteger a, BigInteger n) {
@@ -127,7 +158,8 @@ public class FiatShamir {
     }
 
     private void generateOpenKey() {
-        for (int i = 0; i < hash.length(); i++) {
+        b = new BigInteger[hash.length];
+        for (int i = 0; i < hash.length; i++) {
             b[i] = inverse(a[i], n).modPow(new BigInteger(String.valueOf(2)), n);
         }
     }
