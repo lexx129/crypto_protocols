@@ -8,7 +8,7 @@ import java.security.SecureRandom;
 /**
  * Created by admin on 04.12.2015.
  */
-public class User {
+public class SmartCard {
     private String name;
 
 
@@ -19,19 +19,26 @@ public class User {
     public SecureRandom random;
 
     //Public data
-    private String j;
+    private BigInteger j;
+    private String jString;
     private BigInteger J;
     private BigInteger n;
+    private BigInteger v;
 
     //In-process generating data
     private BigInteger r;
     private BigInteger T;
+
     private BigInteger d;
-    protected BigInteger D;
+    private BigInteger D;
+
+    public void setD(BigInteger d) {
+       this.d = d;
+    }
 
 
     //Constructor for Peggy
-    public User(String name) {
+    public SmartCard(String name) {
         this.name = name;
         this.random = new SecureRandom();
         generateParams();
@@ -41,10 +48,32 @@ public class User {
         p = randomNumber(true, 40);
         q = randomNumber(true, 40);
         n = p.multiply(q);
-        j = byteArrayToHexString(toSHA1(name.getBytes()));
+        j = new BigInteger(toSHA1(name.getBytes()));
+        jString = byteArrayToHexString(toSHA1(name.getBytes()));
+        v = randomNumber(false, 10);
+        generateSecret();
+        generateOpen();
     }
 
-    private BigInteger randomNumber(boolean prime, int size) {
+    private void generateOpen() {
+        r = randomNumber(false, n.subtract(BigInteger.ONE).bitLength());
+        T = r.modPow(v, n);
+        System.out.println("T = " + T);
+    }
+
+    private void generateSecret() {
+        b = j.modPow(v.negate(), n);
+    }
+
+    public SmartCard() {
+    }
+
+    public BigInteger getV() {
+
+        return v;
+    }
+
+    public BigInteger randomNumber(boolean prime, int size) {
         if (prime)
             return BigInteger.probablePrime(size, random);
         BigInteger number = null;
@@ -75,5 +104,20 @@ public class User {
                     Integer.toString((aB & 0xff) + 0x100, 16).substring(1);
         }
         return result;
+    }
+
+    public BigInteger getJ() {
+        return j;
+    }
+
+    public BigInteger getN() {
+
+        return n;
+    }
+
+    public void calculateD(){
+        D = r.multiply(b.modPow(d, n)).mod(n);
+        System.out.println("D = " + D);
+
     }
 }
