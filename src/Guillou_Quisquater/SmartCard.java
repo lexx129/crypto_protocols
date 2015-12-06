@@ -21,7 +21,7 @@ public class SmartCard {
     //Public data
     private BigInteger j;
     private String jString;
-    private BigInteger J;
+
     private BigInteger n;
     private BigInteger v;
 
@@ -33,7 +33,7 @@ public class SmartCard {
     private BigInteger D;
 
     public void setD(BigInteger d) {
-       this.d = d;
+        this.d = d;
     }
 
 
@@ -44,32 +44,42 @@ public class SmartCard {
         generateParams();
     }
 
+    public SmartCard() {
+        this.random = new SecureRandom();
+    }
+
     private void generateParams() {
-        p = randomNumber(true, 40);
-        q = randomNumber(true, 40);
-        n = p.multiply(q);
+        p = randomNumber(true, 10);
+        q = randomNumber(true, 10);
+//        n = p.multiply(q);
+        n = new BigInteger(String.valueOf(524498881));
         j = new BigInteger(toSHA1(name.getBytes()));
+//        System.out.println("j = " + j);
         jString = byteArrayToHexString(toSHA1(name.getBytes()));
-        v = randomNumber(false, 10);
+//        v = randomNumber(false, 8);
+        v = new BigInteger(String.valueOf(100));
+//        System.out.println("v = " + v);
         generateSecret();
+//        System.out.println("JB^v = " + j.multiply(b).mod(n));
         generateOpen();
     }
 
     private void generateOpen() {
+        System.out.println("Generating r...");
         r = randomNumber(false, n.subtract(BigInteger.ONE).bitLength());
+        while (r.compareTo(n.subtract(BigInteger.ONE)) > 0)
+            r = randomNumber(false, n.subtract(BigInteger.ONE).bitLength());
+        System.out.println("r = " + r);
         T = r.modPow(v, n);
         System.out.println("T = " + T);
     }
 
     private void generateSecret() {
-        b = j.modPow(v.negate(), n);
-    }
-
-    public SmartCard() {
+        b = j.modInverse(n).modPow(v, n);
+        System.out.println("   b is " + b);
     }
 
     public BigInteger getV() {
-
         return v;
     }
 
@@ -111,11 +121,10 @@ public class SmartCard {
     }
 
     public BigInteger getN() {
-
         return n;
     }
 
-    public void calculateD(){
+    public void calculateD() {
         D = r.multiply(b.modPow(d, n)).mod(n);
         System.out.println("D = " + D);
 

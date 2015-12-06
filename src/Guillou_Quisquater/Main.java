@@ -12,15 +12,17 @@ public class Main {
         BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(System.out));
 
         SmartCard peggy = new SmartCard("Peggy");
+        System.out.println("n = " + peggy.getN());
+        System.out.println("v = " + peggy.getV());
+        System.out.println("j = " + peggy.getJ());
         bw.write("SmartCard generated. Waiting for d..\n");
         bw.write("d = ");
         bw.flush();
-        BigInteger d = new BigInteger(br.readLine().getBytes());
-        bw.write("d = " + d);
+        BigInteger d = new BigInteger(br.readLine());
+        bw.write("***d = " + d + "\n");
+
         bw.flush();
         peggy.setD(d);
         peggy.calculateD();
-
-
     }
 }

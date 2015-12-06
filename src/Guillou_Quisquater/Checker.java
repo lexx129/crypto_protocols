@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.math.BigInteger;
-import java.security.SecureRandom;
 
 /**
  * Created by admin on 04.12.2015.
@@ -12,22 +11,35 @@ import java.security.SecureRandom;
 public class Checker {
     public static void main(String[] args) throws IOException {
         SmartCard sc = new SmartCard();
-        BigInteger n = sc.getN();
+        System.out.println("Enter n: ");
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        System.out.println("???????? T...");
+        BigInteger n = new BigInteger(br.readLine());
+        System.out.println("***n = " + n);
+        System.out.println("Enter v: ");
+        BigInteger v = new BigInteger(br.readLine());
+        System.out.println("***v = " + v);
+        System.out.println("Enter j: ");
+        BigInteger j = new BigInteger(br.readLine());
+        System.out.println("***j = " + j);
+
+
+        System.out.println("Ожидание T...");
         System.out.println("T = ");
-        BigInteger T = new BigInteger(br.readLine().getBytes());
-        System.out.println("**T is " + T);
-        BigInteger v = sc.getV();
-        System.out.println("Snatched v = " + v);
+//        String temp = br.readLine();
+        BigInteger T = new BigInteger(br.readLine());
+//        BigInteger T = new BigInteger(temp);
+        System.out.println("***T is " + T);
+        System.out.println("Generating d...");
         BigInteger d = sc.randomNumber(false, v.subtract(BigInteger.ONE).bitLength());
+        while (d.compareTo(v.subtract(BigInteger.ONE)) > 0)
+            d = sc.randomNumber(false, v.subtract(BigInteger.ONE).bitLength());
         System.out.println("d = " + d);
-        System.out.println("???????? ??????...");
+//        System.out.println("???????? ??????...");
         System.out.println("D = ");
-        BigInteger D = new BigInteger(br.readLine().getBytes());
-        System.out.println("**D is " + D);
-        BigInteger j = sc.getJ();
-        BigInteger anotherT = D.modPow(v, n).multiply(j.modPow(d, n));
-        System.out.println("T = " + T + "\nT` = " + anotherT);
+        BigInteger D = new BigInteger(br.readLine());
+        System.out.println("***D is " + D);
+        BigInteger anotherT = (D.modPow(v, n)).multiply(j.modPow(d, n)).mod(n);
+        System.out.println("T = " + T + "\nT`(mod n) = " + anotherT.mod(n));
+
     }
 }
