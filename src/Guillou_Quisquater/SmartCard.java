@@ -49,8 +49,8 @@ public class SmartCard {
     }
 
     private void generateParams() {
-        p = randomNumber(true, 10);
-        q = randomNumber(true, 10);
+        p = randomNumber(true, 16);
+        q = randomNumber(true, 16);
         n = p.multiply(q);
 //        n = new BigInteger(String.valueOf(524498881));
         b = new BigInteger(toSHA1(name.getBytes()));
