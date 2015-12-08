@@ -14,21 +14,21 @@ public class Checker {
         System.out.println("Enter n: ");
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         BigInteger n = new BigInteger(br.readLine());
-        System.out.println("***n = " + n);
+//        System.out.println("***n = " + n);
         System.out.println("Enter v: ");
         BigInteger v = new BigInteger(br.readLine());
-        System.out.println("***v = " + v);
+//        System.out.println("***v = " + v);
         System.out.println("Enter j: ");
         BigInteger j = new BigInteger(br.readLine());
-        System.out.println("***j = " + j);
+//        System.out.println("***j = " + j);
 
 
-        System.out.println("Ожидание T...");
+        System.out.println("Waiting for T...");
         System.out.println("T = ");
 //        String temp = br.readLine();
         BigInteger T = new BigInteger(br.readLine());
 //        BigInteger T = new BigInteger(temp);
-        System.out.println("***T is " + T);
+//        System.out.println("***T is " + T);
         System.out.println("Generating d...");
         BigInteger d = sc.randomNumber(false, v.subtract(BigInteger.ONE).bitLength());
         while (d.compareTo(v.subtract(BigInteger.ONE)) > 0)
@@ -37,9 +37,13 @@ public class Checker {
 //        System.out.println("???????? ??????...");
         System.out.println("D = ");
         BigInteger D = new BigInteger(br.readLine());
-        System.out.println("***D is " + D);
+//        System.out.println("***D is " + D);
         BigInteger anotherT = (D.modPow(v, n)).multiply(j.modPow(d, n)).mod(n);
-        System.out.println("T = " + T + "\nT`(mod n) = " + anotherT.mod(n));
+        System.out.println("T = " + T + "\nT`(mod n) = " + anotherT);
+        if (T.equals(anotherT))
+            System.out.println("Smart card is validated.");
+        else
+            System.out.printf("Smart card is not validated.");
 
     }
 }

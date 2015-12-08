@@ -19,7 +19,7 @@ public class Main {
         bw.write("d = ");
         bw.flush();
         BigInteger d = new BigInteger(br.readLine());
-        bw.write("***d = " + d + "\n");
+//        bw.write("***d = " + d + "\n");
 
         bw.flush();
         peggy.setD(d);

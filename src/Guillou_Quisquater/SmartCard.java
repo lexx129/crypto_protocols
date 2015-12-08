@@ -51,13 +51,13 @@ public class SmartCard {
     private void generateParams() {
         p = randomNumber(true, 10);
         q = randomNumber(true, 10);
-//        n = p.multiply(q);
-        n = new BigInteger(String.valueOf(524498881));
-        j = new BigInteger(toSHA1(name.getBytes()));
+        n = p.multiply(q);
+//        n = new BigInteger(String.valueOf(524498881));
+        b = new BigInteger(toSHA1(name.getBytes()));
 //        System.out.println("j = " + j);
         jString = byteArrayToHexString(toSHA1(name.getBytes()));
-//        v = randomNumber(false, 8);
-        v = new BigInteger(String.valueOf(100));
+        v = randomNumber(false, 8);
+//        v = new BigInteger(String.valueOf(100));
 //        System.out.println("v = " + v);
         generateSecret();
 //        System.out.println("JB^v = " + j.multiply(b).mod(n));
@@ -75,7 +75,8 @@ public class SmartCard {
     }
 
     private void generateSecret() {
-        b = j.modInverse(n).modPow(v, n);
+//        b = j.modInverse(n).modPow(v, n);
+        j = b.modPow(v, n).modInverse(n);
         System.out.println("   b is " + b);
     }
 
