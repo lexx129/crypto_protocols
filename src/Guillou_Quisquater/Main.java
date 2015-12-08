@@ -11,7 +11,7 @@ public class Main {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(System.out));
 
-        SmartCard peggy = new SmartCard("Peggy");
+        SmartCard peggy = new SmartCard("Denis Markin 27.06.1994");
         System.out.println("n = " + peggy.getN());
         System.out.println("v = " + peggy.getV());
         System.out.println("j = " + peggy.getJ());

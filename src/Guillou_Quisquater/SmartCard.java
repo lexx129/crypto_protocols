@@ -49,8 +49,8 @@ public class SmartCard {
     }
 
     private void generateParams() {
-        p = randomNumber(true, 16);
-        q = randomNumber(true, 16);
+        p = randomNumber(true, 40);
+        q = randomNumber(true, 40);
         n = p.multiply(q);
 //        n = new BigInteger(String.valueOf(524498881));
         b = new BigInteger(toSHA1(name.getBytes()));
@@ -66,7 +66,8 @@ public class SmartCard {
 
     private void generateOpen() {
         System.out.println("Generating r...");
-        r = randomNumber(false, n.subtract(BigInteger.ONE).bitLength());
+        r = new BigInteger(String.valueOf(18770));
+//        r = randomNumber(false, n.subtract(BigInteger.ONE).bitLength());
         while (r.compareTo(n.subtract(BigInteger.ONE)) > 0)
             r = randomNumber(false, n.subtract(BigInteger.ONE).bitLength());
         System.out.println("r = " + r);
