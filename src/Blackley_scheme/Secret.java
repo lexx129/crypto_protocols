@@ -92,6 +92,30 @@ public class Secret {
         return false;
     }
 
+    public BigInteger[] gaussResolve (BigInteger[][] input){
+        BigInteger[] x = new BigInteger[input.length];
+        for (int i = 0; i < x.length; i++) {
+            x[i] = input[i][input[i].length - 1];
+        }
+        BigInteger m;
+        for (int k = 1; k < input.length; k++) {
+            for (int j = k; j < input.length; j++) {
+                m = input[j][k - 1].multiply(input[k - 1][k - 1].modInverse(p)).mod(p);
+                for (int i = 0; i < input[j].length; i++) {
+                    input[j][i] = (input[j][i].subtract(m.multiply(input[k - 1][i]))).mod(p);
+                }
+                x[j] = (x[j].subtract(m.multiply(x[k - 1]))).mod(p);
+            }
+        }
+        for (int i = input.length; i >= 0; i--) {
+            for (int j = i + 1; j < input.length; j++) {
+                x[i] = (x[i].subtract(input[i][j].multiply(x[j]))).mod(p);
+                x[i] = (x[i].multiply(input[i][i].modInverse(p))).mod(p);
+            }
+        }
+        return x;
+    }
+
 
     private BigInteger randomNumber(boolean prime, int size) {
         if (prime)

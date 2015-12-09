@@ -17,13 +17,18 @@ public class Main {
         BigInteger[] bs = secret.getBs();
         BigInteger[] ds = secret.getDs();
         HashMap<Integer, BigInteger[]> as = secret.getAs();
-
+        System.out.println("\nCalculated parts of secret: ");
         for (int i = 0; i < ds.length; i++) {
             for (int j = 0; j < bs.length; j++) {
                 System.out.print(as.get(i)[j] + " * " + bs[j] + " + ");
             }
-            System.out.println();
+            System.out.println(ds[i]);
         }
-
+        BigInteger[][] system = new BigInteger[n][n];
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+//                system[i][j] =
+            }
+        }
     }
 }
