@@ -2,16 +2,17 @@ package Blackley_scheme;
 
 import java.math.BigInteger;
 import java.security.SecureRandom;
+import java.util.Arrays;
 import java.util.HashMap;
 
 public class Secret {
-    private int secretInt; // наше секретное значение, которое мы разделяем
-    private int threshold; // Пороговое значение
-    private int usersAmount; // Количество человек, между которыми разделяем
+    private BigInteger secretInt; // Г­Г ГёГҐ Г±ГҐГЄГ°ГҐГІГ­Г®ГҐ Г§Г­Г Г·ГҐГ­ГЁГҐ, ГЄГ®ГІГ®Г°Г®ГҐ Г¬Г» Г°Г Г§Г¤ГҐГ«ГїГҐГ¬
+    private int threshold; // ГЏГ®Г°Г®ГЈГ®ГўГ®ГҐ Г§Г­Г Г·ГҐГ­ГЁГҐ
+    private int usersAmount; // ГЉГ®Г«ГЁГ·ГҐГ±ГІГўГ® Г·ГҐГ«Г®ГўГҐГЄ, Г¬ГҐГ¦Г¤Гі ГЄГ®ГІГ®Г°Г»Г¬ГЁ Г°Г Г§Г¤ГҐГ«ГїГҐГ¬
     private BigInteger p;
-    private BigInteger[] bs; // Сгенерированный ряд коэфф. b
-    private HashMap<Integer, BigInteger[]> as; // Сгенерированные ЛНЗ ряды коэфф. a
-    private BigInteger[] ds; // Посчитанные значения d
+    private BigInteger[] bs; // Г‘ГЈГҐГ­ГҐГ°ГЁГ°Г®ГўГ Г­Г­Г»Г© Г°ГїГ¤ ГЄГ®ГЅГґГґ. b
+    private HashMap<Integer, BigInteger[]> as; // Г‘ГЈГҐГ­ГҐГ°ГЁГ°Г®ГўГ Г­Г­Г»ГҐ Г‹ГЌГ‡ Г°ГїГ¤Г» ГЄГ®ГЅГґГґ. a
+    private BigInteger[] ds; // ГЏГ®Г±Г·ГЁГІГ Г­Г­Г»ГҐ Г§Г­Г Г·ГҐГ­ГЁГї d
 
     private SecureRandom rand;
 
@@ -27,30 +28,31 @@ public class Secret {
         return ds;
     }
 
-    public Secret(int secretInt, int usersAmount, int threshold) {
+    public Secret(BigInteger secretInt, int usersAmount, int threshold) {
         this.secretInt = secretInt;
         this.usersAmount = usersAmount;
         this.threshold = threshold;
         this.rand = new SecureRandom();
         this.bs = new BigInteger[threshold];
-        this.as = new HashMap<>(threshold);
+        this.as = new HashMap<>(usersAmount, threshold);
         this.ds = new BigInteger[usersAmount];
     }
 
     public void generatePoint() {
-        p = randomNumber(true, 40);
+        p = randomNumber(true, 70);
+//        p = new BigInteger("13");
         System.out.println("**generated p = " + p);
         bs[0] = new BigInteger(String.valueOf(secretInt));
         for (int i = 1; i < threshold; i++) {
             bs[i] = randomNumber(false, p.bitLength()).mod(p);
         }
     }
-
+//[12345678900987654321, 430801845012088571172, 441915124054896531693, 66708371685936962859, 449082275574752661551]
     public void secretDivide() {
         for (int i = 0; i < usersAmount; i++) {
             BigInteger[] curr = new BigInteger[threshold];
             for (int j = 0; j < curr.length; j++) {
-                curr[j] = randomNumber(false, 10).mod(p);
+                curr[j] = randomNumber(false, 60).mod(p);
             }
             if (i != 0) {
                 if (isLinearIndependent(curr, i))
@@ -97,21 +99,31 @@ public class Secret {
         for (int i = 0; i < x.length; i++) {
             x[i] = input[i][input[i].length - 1];
         }
+//        System.out.println("----\n" + Arrays.toString(x) + "-----\n");
+//        for (int i = 1; i < input.length; i++) {
+//            System.out.println(Arrays.toString(input[i]));
+//        }
         BigInteger m;
         for (int k = 1; k < input.length; k++) {
             for (int j = k; j < input.length; j++) {
                 m = input[j][k - 1].multiply(input[k - 1][k - 1].modInverse(p)).mod(p);
                 for (int i = 0; i < input[j].length; i++) {
-                    input[j][i] = (input[j][i].subtract(m.multiply(input[k - 1][i]))).mod(p);
+                    input[j][i] = input[j][i].subtract(m.multiply(input[k - 1][i])).mod(p);
                 }
-                x[j] = (x[j].subtract(m.multiply(x[k - 1]))).mod(p);
+                x[j] = x[j].subtract(m.multiply(x[k - 1])).mod(p);
             }
         }
-        for (int i = input.length; i >= 0; i--) {
+//        for (int i = 0; i < input.length; i++) {
+//            System.out.println(Arrays.toString(input[i]));
+//        }
+        for (int i = input.length - 1; i >= 0; i--) {
             for (int j = i + 1; j < input.length; j++) {
-                x[i] = (x[i].subtract(input[i][j].multiply(x[j]))).mod(p);
-                x[i] = (x[i].multiply(input[i][i].modInverse(p))).mod(p);
+                x[i] = x[i].subtract(input[i][j].multiply(x[j])).mod(p);
             }
+                x[i] = x[i].multiply(input[i][i].modInverse(p)).mod(p);
+        }
+        for (int i = 0; i < x.length; i++) {
+            x[i] = x[i].negate().mod(p);
         }
         return x;
     }

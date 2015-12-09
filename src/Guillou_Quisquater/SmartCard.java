@@ -21,6 +21,7 @@ public class SmartCard {
     //Public data
     private BigInteger j;
     private String jString;
+    private BigInteger J;
 
     private BigInteger n;
     private BigInteger v;
@@ -53,10 +54,11 @@ public class SmartCard {
         q = randomNumber(true, 40);
         n = p.multiply(q);
 //        n = new BigInteger(String.valueOf(524498881));
-        b = new BigInteger(toSHA1(name.getBytes()));
+        v = randomNumber(false, 8);
+        j = new BigInteger(toSHA1(name.getBytes()));
+        J = j.modPow(v, n);
 //        System.out.println("j = " + j);
         jString = byteArrayToHexString(toSHA1(name.getBytes()));
-        v = randomNumber(false, 8);
 //        v = new BigInteger(String.valueOf(100));
 //        System.out.println("v = " + v);
         generateSecret();
@@ -66,8 +68,8 @@ public class SmartCard {
 
     private void generateOpen() {
         System.out.println("Generating r...");
-        r = new BigInteger(String.valueOf(18770));
-//        r = randomNumber(false, n.subtract(BigInteger.ONE).bitLength());
+//        r = new BigInteger(String.valueOf(18770));
+        r = randomNumber(false, n.subtract(BigInteger.ONE).bitLength());
         while (r.compareTo(n.subtract(BigInteger.ONE)) > 0)
             r = randomNumber(false, n.subtract(BigInteger.ONE).bitLength());
         System.out.println("r = " + r);
@@ -76,8 +78,8 @@ public class SmartCard {
     }
 
     private void generateSecret() {
-//        b = j.modInverse(n).modPow(v, n);
-        j = b.modPow(v, n).modInverse(n);
+        b = j.modInverse(n);
+//        j = b.modPow(v, n).modInverse(n);
         System.out.println("   b is " + b);
     }
 
@@ -119,7 +121,7 @@ public class SmartCard {
     }
 
     public BigInteger getJ() {
-        return j;
+        return J;
     }
 
     public BigInteger getN() {

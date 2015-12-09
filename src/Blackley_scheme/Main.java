@@ -6,9 +6,11 @@ import java.util.HashMap;
 
 public class Main {
     public static void main(String[] args) {
-        int m = 40;
-        int n = 3;
-        int k = 2;
+        BigInteger m = new BigInteger(String.valueOf("12345678900987654321"));
+
+//        int m = 6;
+        int n = 10;
+        int k = 5;
         System.out.println("Please wait while generating points...");
         Secret secret = new Secret(m, n, k);
         secret.generatePoint();
@@ -24,11 +26,16 @@ public class Main {
             }
             System.out.println(ds[i]);
         }
-        BigInteger[][] system = new BigInteger[n][n];
-        for (int i = 0; i < n; i++) {
-            for (int j = 0; j < n; j++) {
-//                system[i][j] =
+        BigInteger[][] system = new BigInteger[k][k + 1];
+        for (int i = 0; i < k; i++) {
+            for (int j = 0; j < k; j++) {
+                system[i][j] = as.get(i)[j];
             }
+            system[i][k] = ds[i];
         }
+        BigInteger[] revealedSecret = secret.gaussResolve(system);
+        System.out.println(Arrays.toString(revealedSecret));
     }
+
+
 }

@@ -11,10 +11,10 @@ public class Main {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(System.out));
 
-        SmartCard peggy = new SmartCard("Denis Markin 27.06.1994");
+        SmartCard peggy = new SmartCard("My name is Peggy");
         System.out.println("n = " + peggy.getN());
         System.out.println("v = " + peggy.getV());
-        System.out.println("j = " + peggy.getJ());
+        System.out.println("J = " + peggy.getJ());
         bw.write("SmartCard generated. Waiting for d..\n");
         bw.write("d = ");
         bw.flush();
